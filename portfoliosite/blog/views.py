@@ -1,9 +1,9 @@
 from django.shortcuts import render, get_object_or_404
 from .models import Post
-from django.core.paginator import Paginator
 from django.views.generic import ListView
 from .forms import EmailPostForm
 from django.core.mail import send_mail
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 # Create your views here.
 
@@ -22,7 +22,14 @@ def post_list(request):
     # Pagination with 3 posts per page
     paginator = Paginator(posts_list, 2)
     page_number = request.GET.get('page')
-    posts = paginator.get_page(page_number)
+    try:
+        posts = paginator.get_page(page_number)
+    except PageNotAnInteger:
+        # if page is not an integer deliver the first page
+        posts = paginator.get_page(1)
+    except EmptyPage:
+        # if page is out of range deliver last page of results
+        posts = paginator.get_page(paginator.num_pages)
     return render(request, 'blog/post/list.html', {'posts': posts})
 
 
