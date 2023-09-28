@@ -46,7 +46,15 @@ def post_detail(request, year, month, day, slug):
         published__day=day,
         status=Post.Status.PUBLISHED,
     )
-    return render(request, "blog/post/detail.html", {"post": post})
+    # List of active comments for this post
+    comments = post.comments.filter(active=True)
+    # Form for users to comment
+    form = CommentForm()
+    return render(
+        request,
+        "blog/post/detail.html",
+        {"post": post, "comments": comments, "form": form},
+    )
 
 
 def post_share(request, post_id):
@@ -59,7 +67,6 @@ def post_share(request, post_id):
         if form.is_valid():
             # form fields passed validation
             cd = form.cleaned_data
-            print(cd)
             # ... send email
 
             post_url = request.build_absolute_uri(post.get_absolute_url())
